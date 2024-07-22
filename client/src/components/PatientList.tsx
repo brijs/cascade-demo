@@ -53,7 +53,7 @@ const PatientList: React.FC = () => {
             onClick={() => navigate(`/patient/${patient.identifier}`)}
           >
             <Text size="xl" fw={500}>{patient.name}</Text>
-            <Text size="sm" >Identifier: {patient.identifier}</Text>
+            <Text size="md" >XYZ Healthcare Identifier: {patient.identifier}</Text>
             <Text size="xs" >ID: {patient.id}</Text>
           </Card>
         ))}
