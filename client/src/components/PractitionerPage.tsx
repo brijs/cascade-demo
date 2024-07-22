@@ -41,7 +41,7 @@ const PractitionerPage: React.FC = () => {
 
   return (
     <Box style={{ backgroundColor: 'var(--mantine-color-gray-1', minHeight: '100vh' }}>
-      <NavigationBar practitionerName={practitioner?.name?.[0]?.text || 'Loading...'} />
+      <NavigationBar personName={practitioner?.name?.[0]?.text || 'Loading...'} />
       <Box mt="md" style={{ margin: '0 auto', maxWidth: '1200px', paddingLeft: '10px', paddingRight: '10px' }}>
         <Calendar2 freeSlots={freeSlots} />
       </Box>

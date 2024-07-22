@@ -6,7 +6,7 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   const handlePatientView = () => {
-    navigate('/patient');
+    navigate('/patient/50');
   };
 
   const handlePractitionerView = () => {
