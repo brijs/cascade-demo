@@ -3,14 +3,14 @@ import { Schedule, Practitioner, Slot, Identifier } from '@medplum/fhirtypes';
 import { v4 as uuidv4 } from 'uuid';
 
 
-function generateRandomSlots(startDate: Date, endDate: Date, busySlots: number): Slot[] {
+function generateRandomSlots(startDate: Date, endDate: Date, freeSlots: number): Slot[] {
     const slots: Slot[] = [];
     const currentDate = new Date(startDate);
 
     while (currentDate <= endDate) {
         // Generate busy slots only on weekdays
         if (currentDate.getDay() !== 0 && currentDate.getDay() !== 6) { // 0 = Sunday, 6 = Saturday
-            for (let i = 0; i < busySlots; i++) {
+            for (let i = 0; i < freeSlots; i++) {
                 const startHour = 9 + Math.floor(Math.random() * 8); // Random hour between 9 and 16
                 const slotStart = new Date(currentDate);
                 slotStart.setHours(startHour, 0, 0, 0);
@@ -24,25 +24,9 @@ function generateRandomSlots(startDate: Date, endDate: Date, busySlots: number):
                     schedule: { reference: 'Schedule/example' },
                     start: slotStart.toISOString(),
                     end: slotEnd.toISOString(),
-                    status: 'busy'
+                    status: 'free'
                 });
             }
-        } else {
-            // Mark the entire day as unavailable for weekends
-            const slotStart = new Date(currentDate);
-            slotStart.setHours(0, 0, 0, 0);
-
-            const slotEnd = new Date(currentDate);
-            slotEnd.setHours(23, 59, 59, 999);
-
-            slots.push({
-                resourceType: 'Slot',
-                id: uuidv4(),
-                schedule: { reference: 'Schedule/example' },
-                start: slotStart.toISOString(),
-                end: slotEnd.toISOString(),
-                status: 'busy'
-            });
         }
         currentDate.setDate(currentDate.getDate() + 1);
     }
@@ -55,9 +39,9 @@ async function createPractitionerSchedule(practitionerId: string): Promise<Sched
     startDate.setHours(23, 59, 59, 999);
     const endDate = new Date();
     endDate.setHours(23, 59, 59, 999);
-    endDate.setDate(startDate.getDate() + 2); // Generate a schedule for the next 30 days
+    endDate.setDate(startDate.getDate() + 3); // Generate a schedule for the next 30 days
 
-    const slots = generateRandomSlots(startDate, endDate, 3); // 3 busy slots per weekday
+    const slots = generateRandomSlots(startDate, endDate, 3); // 3 free slots per weekday
 
     const schedule: Schedule = {
         resourceType: 'Schedule',
