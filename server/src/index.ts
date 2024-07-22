@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import Constants from './constants';
 import MedplumClientSingleton from './medplumClient';
@@ -8,6 +9,7 @@ dotenv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 // Initialize the Medplum client singleton
 const medplumClient = MedplumClientSingleton.getInstance();
