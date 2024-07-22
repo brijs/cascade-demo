@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
-import { Practitioner, Slot } from '@medplum/fhirtypes';
+import { Appointment, Practitioner, Slot } from '@medplum/fhirtypes';
 import NavigationBar from './NavigationBar';
 // import Calendar from './Calendar';
 import Calendar2 from './Calendar2';
@@ -16,7 +16,9 @@ const PractitionerPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [practitioner, setPractitioner] = useState<Practitioner | null>(null);
   const [freeSlots, setFreeSlots] = useState<Slot[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
 
+  
   useEffect(() => {
     const fetchPractitioner = async () => {
       const response = await axios.get(`/api/profiles/practitioners?identifier=${id}`);
@@ -39,11 +41,23 @@ const PractitionerPage: React.FC = () => {
     }
   }, [practitioner]);
 
+  useEffect(() => {
+    if (practitioner) {
+      const fetchAppointments = async () => {
+        const response = await axios.get(`/api/appointments?practitionerId=${practitioner.id}`);
+        setAppointments(response.data);
+      };
+
+      fetchAppointments();
+    }
+  }, [practitioner]);
+
+
   return (
     <Box style={{ backgroundColor: 'var(--mantine-color-gray-1', minHeight: '100vh' }}>
       <NavigationBar personName={practitioner?.name?.[0]?.text || 'Loading...'} />
       <Box mt="md" style={{ margin: '0 auto', maxWidth: '1200px', paddingLeft: '10px', paddingRight: '10px' }}>
-        <Calendar2 freeSlots={freeSlots} />
+        <Calendar2 freeSlots={freeSlots} appointments={appointments} />
       </Box>
     </Box>
   );

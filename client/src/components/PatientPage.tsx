@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { Practitioner, Patient, Slot } from '@medplum/fhirtypes';
 import NavigationBar from './NavigationBar';
@@ -13,7 +13,6 @@ import '@mantine/notifications/styles.css';
 
 const PatientPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
   const [patient, setPatient] = useState<Patient | null>(null);
   const [practitioners, setPractitioners] = useState<Practitioner[]>([]);
