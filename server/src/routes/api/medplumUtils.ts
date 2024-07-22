@@ -40,9 +40,9 @@ export async function createPractitionerSchedule(practitionerId: string): Promis
     startDate.setHours(23, 59, 59, 999);
     const endDate = new Date();
     endDate.setHours(23, 59, 59, 999);
-    endDate.setDate(startDate.getDate() + 3); // Generate a schedule for the next 30 days
+    endDate.setDate(startDate.getDate() + 7); // Generate a schedule for the next 7 days
 
-    const slots = generateRandomSlots(startDate, endDate, 3); // 3 free slots per weekday
+    const slots = generateRandomSlots(startDate, endDate, 2); // 2 free slots per weekday
 
     const schedule: Schedule = {
         resourceType: 'Schedule',
@@ -82,29 +82,49 @@ export interface GetFreeSlotsParams {
 export async function getFreeSlots(params: GetFreeSlotsParams): Promise<Slot[]> {
     const { practitionerIds, patientId, startDate, endDate } = params;
 
-    // Construct the base search parameters
-    const searchParams = new URLSearchParams({
-        'status': 'free',
+    const medplumClient = MedplumClientSingleton.getInstance();
+
+    // Fetch schedules for the specified practitioners
+    const scheduleSearchParams = new URLSearchParams({
         'actor': practitionerIds.map(id => `Practitioner/${id}`).join(',')
+    });
+
+    const scheduleBundle = await medplumClient.search('Schedule',
+        scheduleSearchParams.toString()
+    );
+
+    if (!scheduleBundle.entry) {
+        return [];
+    }
+
+    const scheduleIds = scheduleBundle.entry.map(entry => (entry.resource as Schedule).id);
+
+    if (!scheduleIds.length) {
+        return [];
+    }
+
+    // Fetch slots with 'free' status linked to the fetched schedules
+    const slotSearchParams = new URLSearchParams({
+        'status': 'free',
+        'schedule': scheduleIds.map(id => `Schedule/${id}`).join(',')
     });
 
     // Add date range parameters if specified
     if (startDate) {
-        searchParams.append('start', `ge${startDate}`);
+        slotSearchParams.append('start', `ge${startDate}`);
     }
     if (endDate) {
-        searchParams.append('end', `le${endDate}`);
+        slotSearchParams.append('end', `le${endDate}`);
     }
 
     // Add patient reference if specified - Logical AND
     if (patientId) {
-        searchParams.append('patient', `Patient/${patientId}`);
+        slotSearchParams.append('patient', `Patient/${patientId}`);
     }
 
     // Perform the search query
-    const medplumClient = MedplumClientSingleton.getInstance();
     const slotBundle = await medplumClient.search('Slot',
-        searchParams.toString()
+        slotSearchParams.toString()
     );
 
     if (!slotBundle.entry) {

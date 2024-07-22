@@ -9,6 +9,9 @@ router.get('/free-slots', async (req, res) => {
 
     try {
         const practitionerIds = (req.query.practitionerIds as string)?.split(',') || [];
+        if (practitionerIds.length == 0) {
+            return res.status(400).json({ error: "Practitioner IDs can't be empty" });
+        }
         const patientId = req.query.patientId as string;
         const startDate = req.query.startDate as string;
         const endDate = req.query.endDate as string;

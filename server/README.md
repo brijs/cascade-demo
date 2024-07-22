@@ -14,18 +14,18 @@ curl -X POST http://localhost:3000/api/internal/createPatient -H "Content-Type: 
 curl -X POST http://localhost:3000/api/internal/createPractitioner -H "Content-Type: application/json" -d '{"name":"Practitioner 100", "identifier":"100"}'
 
 # Get free slots for practitioner, date-range, patient
-curl -X GET http://localhost:3000/api/appointments/free-slots -H "Content-Type: application/json" -d '{"name":"Practitioner 100", "identifier":"100"}'
+curl -X GET http://localhost:3000/api/appointments/free-slots?practitionerIds=179d95a2-dcae-4aa1-b77c-77796ebf8360,64df222a-24c9-4a9b-9fb0-0b4629584163&startDate=2024/07/24 
 
 # Get all patients
-curl -X GET http://localhost:3000/api/profiles/patients -H "Content-Type: application/json"
+curl -X GET http://localhost:3000/api/profiles/patients
 
 # Get patient with cascade identifier
-curl -X GET http://localhost:3000/api/profiles/patients?identifier=51 -H "Content-Type: application/json"
+curl -X GET http://localhost:3000/api/profiles/patients?identifier=51 
 
 # Get all practitioners
-curl -X GET http://localhost:3000/api/profiles/practitioners -H "Content-Type: application/json"
+curl -X GET http://localhost:3000/api/profiles/practitioners 
 
 # Get patient with cascade identifier
-curl -X GET http://localhost:3000/api/profiles/practitioners?identifier=101 -H "Content-Type: application/json"
+curl -X GET http://localhost:3000/api/profiles/practitioners?identifier=101 
 
 ```
