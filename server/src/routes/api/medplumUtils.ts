@@ -1,6 +1,7 @@
 import MedplumClientSingleton from '../../medplumClient';
-import { Schedule, Practitioner, Slot, Bundle, Identifier } from '@medplum/fhirtypes';
+import { Schedule, Practitioner, Slot, Appointment, Patient, Reference } from '@medplum/fhirtypes';
 import { v4 as uuidv4 } from 'uuid';
+import Constants from '../../constants';
 
 
 
@@ -132,4 +133,106 @@ export async function getFreeSlots(params: GetFreeSlotsParams): Promise<Slot[]> 
     }
 
     return slotBundle.entry.map((entry) => entry.resource as Slot);
+}
+
+
+interface BookAppointmentParams {
+    patientId: string;
+    slotId: string;
+}
+
+export async function bookAppointment(params: BookAppointmentParams): Promise<Appointment> {
+    const { patientId, slotId } = params;
+
+    const medplumClient = MedplumClientSingleton.getInstance();
+
+    // Fetch the slot
+    const slot = await medplumClient.readResource('Slot', slotId);
+
+    if (!slot.schedule?.reference) {
+        throw new Error('Schedule reference not found in Slot');
+    }
+
+    // Fetch the schedule
+    const schedule = await medplumClient.readReference<Schedule>(slot.schedule);
+
+    if (!schedule.actor || !schedule.actor.length) {
+        throw new Error('No practitioners found in Schedule');
+    }
+
+    // Fetch the first practitioner in the schedule
+    const practitionerReference = schedule.actor.find(actor => actor.reference?.startsWith('Practitioner/'));
+
+    if (!practitionerReference) {
+        throw new Error('Practitioner reference not found in Schedule');
+    }
+
+    // const practitioner = await medplumClient.readReference<Practitioner>(
+    //     practitionerReference as Reference<Practitioner>);
+
+    // Create the appointment
+    const appointment: Appointment = {
+        resourceType: 'Appointment',
+        status: 'booked',
+        participant: [
+            {
+                actor: { reference: `Patient/${patientId}` },
+                status: 'accepted'
+            },
+            {
+                actor: { reference: practitionerReference.reference },
+                status: 'accepted'
+            }
+        ],
+        start: slot.start,
+        end: slot.end,
+        slot: [{ reference: `Slot/${slotId}` }],
+        identifier: [{
+            system: Constants.CASCADE_URL, // for filtering
+            value: `Patient/${patientId}-Slot/${slotId}`
+        }]
+    };
+
+    const createdAppointment = await medplumClient.createResource<Appointment>(appointment);
+
+    // Update the slot to be busy
+    slot.status = 'busy';
+    await medplumClient.updateResource<Slot>(slot);
+
+    return createdAppointment;
+}
+
+
+interface GetAppointmentsParams {
+    patientId?: string;
+    practitionerId?: string;
+}
+
+export async function getAppointments(params: GetAppointmentsParams): Promise<Appointment[]> {
+    const { patientId, practitionerId } = params;
+
+    const medplumClient = MedplumClientSingleton.getInstance();
+
+    if (!patientId && !practitionerId) {
+        throw new Error('At least one of patientId or practitionerId must be specified');
+    }
+
+    const searchParams = new URLSearchParams();
+    if (patientId) {
+        searchParams.append('actor', `Patient/${patientId}`);
+    }
+    if (practitionerId) {
+        searchParams.append('actor', `Practitioner/${practitionerId}`);
+    }
+
+    const appointmentBundle = await medplumClient.search(
+        'Appointment',
+        searchParams.toString()
+    );
+
+    if (!appointmentBundle.entry) {
+        return [];
+    }
+
+    return appointmentBundle.entry.map(entry => entry.resource as Appointment);
 }

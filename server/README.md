@@ -28,4 +28,11 @@ curl -X GET http://localhost:3000/api/profiles/practitioners
 # Get patient with cascade identifier
 curl -X GET http://localhost:3000/api/profiles/practitioners?identifier=101 
 
+# Book an appointment
+curl -X POST http://localhost:3000/api/appointments/ -H "Content-Type: application/json" -d '{"patientId":"456", "slotId":"123"}'
+
+# Get appointments or patient / practitioner
+curl -X GET http://localhost:3000/api/appointments?patientId=123
+curl -X GET http://localhost:3000/api/appointments?practitionerId=123
+
 ```
