@@ -6,3 +6,10 @@ export interface PatientRequest extends Request {
         identifier: string;
     };
 }
+
+export interface PractitionerRequest extends Request {
+    body: {
+        name: string;
+        identifier: string;
+    };
+}

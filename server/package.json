@@ -15,9 +15,11 @@
   "dependencies": {
     "@medplum/core": "^3.2.2",
     "@medplum/fhirtypes": "^3.2.2",
+    "@types/uuid": "^10.0.0",
     "axios": "^1.7.2",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
