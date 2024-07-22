@@ -1,6 +1,7 @@
 import MedplumClientSingleton from '../../medplumClient';
-import { Schedule, Practitioner, Slot, Identifier } from '@medplum/fhirtypes';
+import { Schedule, Practitioner, Slot, Bundle, Identifier } from '@medplum/fhirtypes';
 import { v4 as uuidv4 } from 'uuid';
+
 
 
 function generateRandomSlots(startDate: Date, endDate: Date, freeSlots: number): Slot[] {
@@ -34,7 +35,7 @@ function generateRandomSlots(startDate: Date, endDate: Date, freeSlots: number):
     return slots;
 }
 
-async function createPractitionerSchedule(practitionerId: string): Promise<Schedule> {
+export async function createPractitionerSchedule(practitionerId: string): Promise<Schedule> {
     const startDate = new Date();
     startDate.setHours(23, 59, 59, 999);
     const endDate = new Date();
@@ -69,4 +70,46 @@ async function createPractitionerSchedule(practitionerId: string): Promise<Sched
     return schedule;
 }
 
-export default createPractitionerSchedule;
+
+
+export interface GetFreeSlotsParams {
+    practitionerIds: string[];
+    patientId?: string;
+    startDate?: string;
+    endDate?: string;
+}
+
+export async function getFreeSlots(params: GetFreeSlotsParams): Promise<Slot[]> {
+    const { practitionerIds, patientId, startDate, endDate } = params;
+
+    // Construct the base search parameters
+    const searchParams = new URLSearchParams({
+        'status': 'free',
+        'actor': practitionerIds.map(id => `Practitioner/${id}`).join(',')
+    });
+
+    // Add date range parameters if specified
+    if (startDate) {
+        searchParams.append('start', `ge${startDate}`);
+    }
+    if (endDate) {
+        searchParams.append('end', `le${endDate}`);
+    }
+
+    // Add patient reference if specified - Logical AND
+    if (patientId) {
+        searchParams.append('patient', `Patient/${patientId}`);
+    }
+
+    // Perform the search query
+    const medplumClient = MedplumClientSingleton.getInstance();
+    const slotBundle = await medplumClient.search('Slot',
+        searchParams.toString()
+    );
+
+    if (!slotBundle.entry) {
+        return [];
+    }
+
+    return slotBundle.entry.map((entry) => entry.resource as Slot);
+}

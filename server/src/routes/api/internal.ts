@@ -4,7 +4,7 @@ import Constants from '../../constants';
 import MedplumClientSingleton from '../../medplumClient';
 import { PatientRequest, PractitionerRequest } from '../api/types'
 import { Request, Response } from 'express';
-import createPractitionerSchedule from './medplumUtils';
+import { createPractitionerSchedule } from './medplumUtils';
 
 const router = Router();
 
@@ -91,5 +91,6 @@ router.post('/createPractitioner', async (req: PractitionerRequest, res: Respons
         res.status(500).json({ message: error.message });
     }
 });
+
 
 export default router;
