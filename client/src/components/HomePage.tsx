@@ -6,11 +6,11 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate();
 
   const handlePatientView = () => {
-    navigate('/patient/50');
+    navigate('/patient');
   };
 
   const handlePractitionerView = () => {
-    navigate('/practitioner/104');
+    navigate('/practitioner');
   };
 
   return (

@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PractitionerPage from './components/PractitionerPage';
 import PatientPage from './components/PatientPage';
 import HomePage from './components/HomePage';
+import PatientList from './components/PatientList';
+import PractitionerList from './components/PractitionerList';
 
 const AppRoutes: React.FC = () => {
   return (
@@ -11,8 +13,8 @@ const AppRoutes: React.FC = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/practitioner/:id" element={<PractitionerPage />} />
         <Route path="/patient/:id" element={<PatientPage />} />
-        <Route path="/patient" element={<div>Patient View (Placeholder)</div>} />
-        <Route path="/practitioner" element={<div>Practitioner View (Placeholder)</div>} />
+        <Route path="/patient" element={<PatientList />} />
+        <Route path="/practitioner" element={<PractitionerList />} />
       </Routes>
     </Router>
   );
