@@ -41,7 +41,7 @@ export async function createPractitionerSchedule(practitionerId: string): Promis
     startDate.setHours(23, 59, 59, 999);
     const endDate = new Date();
     endDate.setHours(23, 59, 59, 999);
-    endDate.setDate(startDate.getDate() + 7); // Generate a schedule for the next 7 days
+    endDate.setDate(startDate.getDate() + 30); // Generate a schedule for the next 30 days
 
     const slots = generateRandomSlots(startDate, endDate, 2); // 2 free slots per weekday
 
